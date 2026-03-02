@@ -151,7 +151,31 @@ input:focus,select:focus{border-color:var(--cherry);background:white}
 .empty-state{text-align:center;padding:28px 18px;color:var(--text-muted)}
 .ei{font-size:38px;margin-bottom:7px}.empty-state p{font-size:13.5px}
 
-/* SYNC LOG */
+/* NUM INPUT (stepper) */
+.num-input{display:flex;align-items:center;gap:0;border:2px solid #f2dde2;border-radius:11px;overflow:hidden;background:var(--cherry-pale)}
+.num-input button{background:none;border:none;padding:11px 16px;font-size:20px;font-weight:700;color:var(--cherry);cursor:pointer;transition:background .15s;font-family:'DM Sans',sans-serif;line-height:1;flex-shrink:0}
+.num-input button:active{background:#fce8ec}
+.num-input input{border:none;background:transparent;text-align:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--cherry-dark);width:100%;outline:none;padding:0;-moz-appearance:textfield}
+.num-input input::-webkit-outer-spin-button,.num-input input::-webkit-inner-spin-button{-webkit-appearance:none}
+
+/* RESUMO CONV */
+.resumo-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--cherry-pale);font-size:14px}
+.resumo-row:last-child{border-bottom:none}
+.resumo-label{color:var(--text-muted);font-weight:600}
+.resumo-val{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:var(--cherry-dark)}
+.resumo-section{background:var(--cherry-pale);border-radius:11px;padding:12px 14px;margin-bottom:10px}
+.resumo-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-muted);margin-bottom:8px}
+
+/* FAMILIA CARD */
+.fam-card{background:var(--cherry-pale);border-radius:12px;padding:12px 13px;margin-bottom:8px;border-left:3px solid var(--cherry-soft)}
+.fam-card.sp{border-left-color:var(--leaf)}.fam-card.sc{border-left-color:#ccc;opacity:.7}
+.fam-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.fam-nome{font-weight:700;font-size:14px;color:var(--cherry-dark)}
+.fam-pills{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.fam-pill{display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:50px;font-size:11px;font-weight:700;background:white}
+.fam-pill.adulto{color:#8a1040;background:#fde8f0}
+.fam-pill.crianca{color:#1a5090;background:#e8f4ff}
+.fam-actions{display:flex;gap:5px;flex-shrink:0}
 .sync-log{background:#0d1117;border-radius:9px;padding:11px;font-family:monospace;font-size:11px;color:#7ee787;max-height:90px;overflow-y:auto;margin-top:9px;display:none}
 .sync-log.visible{display:block}
 .le{color:#ff7070}.li2{color:#79c0ff}
@@ -269,42 +293,71 @@ code{background:#fce8ec;padding:2px 6px;border-radius:5px;font-size:11.5px;color
   <!-- ===== CONVIDADOS ===== -->
   <div id="tab-conv" class="panel">
     <div class="card">
-      <div class="ca">👥</div>
-      <div class="card-head"><div class="chL"><span class="ci">👥</span><span class="ct">Novo Convidado</span></div></div>
-      <div class="fgrp"><label>Nome</label><input type="text" id="cNome" placeholder="Nome completo..." autocomplete="off"></div>
+      <div class="ca">👨‍👩‍👧</div>
+      <div class="card-head"><div class="chL"><span class="ci">👨‍👩‍👧</span><span class="ct">Nova Família</span></div></div>
+
+      <div class="fgrp">
+        <label>Família (responsável)</label>
+        <input type="text" id="cFamilia" placeholder="Ex: Família Danilo, Tia Maria..." autocomplete="off">
+      </div>
+
       <div class="frow2">
-        <div class="fgrp"><label>Tipo</label>
-          <select id="cTipo"><option>Criança</option><option>Adulto</option></select>
+        <div class="fgrp">
+          <label>👨 Adultos</label>
+          <div class="num-input">
+            <button type="button" onclick="stepNum('cAdultos',-1)">−</button>
+            <input type="number" id="cAdultos" value="1" min="0" max="20" inputmode="numeric" readonly>
+            <button type="button" onclick="stepNum('cAdultos',1)">+</button>
+          </div>
         </div>
-        <div class="fgrp"><label>Confirmação</label>
-          <select id="cStatus"><option>Aguardando</option><option>Confirmado</option><option>Não virá</option></select>
+        <div class="fgrp">
+          <label>👧 Crianças</label>
+          <div class="num-input">
+            <button type="button" onclick="stepNum('cCriancas',-1)">−</button>
+            <input type="number" id="cCriancas" value="0" min="0" max="20" inputmode="numeric" readonly>
+            <button type="button" onclick="stepNum('cCriancas',1)">+</button>
+          </div>
         </div>
       </div>
-      <div class="fgrp"><label>Telefone</label><input type="tel" id="cTel" placeholder="(00) 00000-0000" inputmode="tel"></div>
-      <button class="btn btn-cherry btn-full" onclick="addConv()">🍒 Adicionar Convidado</button>
+
+      <div class="fgrp">
+        <label>Confirmação</label>
+        <select id="cStatus"><option>Aguardando</option><option>Confirmado</option><option>Não virá</option></select>
+      </div>
+
+      <button class="btn btn-cherry btn-full" onclick="addConv()">🍒 Adicionar Família</button>
     </div>
 
-    <div class="mini-stats">
-      <div class="msc"><span class="msc-v" id="cTotal">0</span><span class="msc-l">Total</span></div>
-      <div class="msc"><span class="msc-v" id="cCri">0</span><span class="msc-l">👧 Cri.</span></div>
-      <div class="msc"><span class="msc-v" id="cAdu">0</span><span class="msc-l">👨 Adu.</span></div>
-      <div class="msc"><span class="msc-v" id="cConf">0</span><span class="msc-l">✅ Conf.</span></div>
+    <!-- MINI STATS -->
+    <div class="mini-stats" style="grid-template-columns:repeat(4,1fr)">
+      <div class="msc"><span class="msc-v" id="cTotFam">0</span><span class="msc-l">Famílias</span></div>
+      <div class="msc"><span class="msc-v" id="cTotPessoas">0</span><span class="msc-l">Pessoas</span></div>
+      <div class="msc"><span class="msc-v" id="cTotCri">0</span><span class="msc-l">👧 Crian.</span></div>
+      <div class="msc"><span class="msc-v" id="cTotAdultos">0</span><span class="msc-l">👨 Adult.</span></div>
     </div>
 
+    <!-- BARRA CONFIRMADOS -->
     <div class="card" style="padding:13px 14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <span style="font-size:12px;font-weight:700;color:var(--text-muted)">Confirmados</span>
+        <span style="font-size:12px;font-weight:700;color:var(--text-muted)">Famílias confirmadas</span>
         <span style="font-size:12px;font-weight:700;color:var(--leaf)" id="progPct">0%</span>
       </div>
       <div class="prog-wrap"><div class="prog-bar" id="progConf" style="width:0%"></div></div>
     </div>
 
+    <!-- LISTA -->
     <div class="card">
       <div class="card-head">
-        <div class="chL"><span class="ci">📋</span><span class="ct">Convidados</span></div>
+        <div class="chL"><span class="ci">📋</span><span class="ct">Lista de Famílias</span></div>
         <button class="btn btn-leaf btn-sm" onclick="exportCSV('convidados')">⬇️ CSV</button>
       </div>
-      <div id="cLista"><div class="empty-state"><div class="ei">🎈</div><p>Nenhum convidado ainda</p></div></div>
+      <div id="cLista"><div class="empty-state"><div class="ei">🎈</div><p>Nenhuma família ainda</p></div></div>
+    </div>
+
+    <!-- RESUMO DETALHADO -->
+    <div class="card" id="resumoConvCard" style="display:none">
+      <div class="card-head"><div class="chL"><span class="ci">📊</span><span class="ct">Resumo de Convidados</span></div></div>
+      <div id="resumoConvBody"></div>
     </div>
   </div>
 
@@ -383,7 +436,7 @@ function doPost(e) {
     if (data.type === 'orcamentos') writeSheet('Orcamentos', data.rows,
       ['id','desc','cat','valor','status','obs','data']);
     if (data.type === 'convidados') writeSheet('Convidados', data.rows,
-      ['id','nome','tipo','status','tel']);
+      ['id','familia','adultos','criancas','status']);
     return ContentService
       .createTextOutput(JSON.stringify({ok:true}))
       .setMimeType(ContentService.MimeType.JSON);
@@ -570,47 +623,119 @@ function renderOrc(){
 }
 
 // ════════════════════════════════════
-// CONVIDADOS
+// CONVIDADOS — modelo por família
 // ════════════════════════════════════
+function stepNum(id, delta) {
+  const el = document.getElementById(id);
+  const v = Math.max(0, Math.min(20, parseInt(el.value||0) + delta));
+  el.value = v;
+}
+
 function addConv(){
-  const n=document.getElementById('cNome').value.trim();
-  if(!n){alert('Informe o nome!');return;}
-  D.conv.push({id:Date.now(),nome:n,tipo:document.getElementById('cTipo').value,
-    status:document.getElementById('cStatus').value,tel:document.getElementById('cTel').value});
-  document.getElementById('cNome').value='';
-  document.getElementById('cTel').value='';
-  saveLocal();render();
+  const fam = document.getElementById('cFamilia').value.trim();
+  if(!fam){alert('Informe o nome da família!');return;}
+  const adultos  = parseInt(document.getElementById('cAdultos').value)  || 0;
+  const criancas = parseInt(document.getElementById('cCriancas').value) || 0;
+  if(adultos + criancas === 0){alert('Adicione pelo menos 1 pessoa!');return;}
+  D.conv.push({
+    id: Date.now(),
+    familia: fam,
+    adultos,
+    criancas,
+    status: document.getElementById('cStatus').value
+  });
+  document.getElementById('cFamilia').value = '';
+  document.getElementById('cAdultos').value  = 1;
+  document.getElementById('cCriancas').value = 0;
+  saveLocal(); render();
   pushSheet('convidados');
 }
-function delConv(id){if(confirm('Remover?')){D.conv=D.conv.filter(x=>x.id!==id);saveLocal();render();pushSheet('convidados');}}
+
+function delConv(id){
+  if(confirm('Remover família?')){
+    D.conv = D.conv.filter(x=>x.id!==id);
+    saveLocal(); render(); pushSheet('convidados');
+  }
+}
 
 function renderConv(){
-  const tot=D.conv.length,
-        cri=D.conv.filter(x=>x.tipo==='Criança').length,
-        adu=D.conv.filter(x=>x.tipo==='Adulto').length,
-        cnf=D.conv.filter(x=>x.status==='Confirmado').length;
-  document.getElementById('cTotal').textContent=tot;
-  document.getElementById('cCri').textContent=cri;
-  document.getElementById('cAdu').textContent=adu;
-  document.getElementById('cConf').textContent=cnf;
-  const pct=tot?Math.round(cnf/tot*100):0;
-  document.getElementById('progConf').style.width=pct+'%';
-  document.getElementById('progPct').textContent=pct+'%';
-  const el=document.getElementById('cLista');
-  if(!D.conv.length){el.innerHTML='<div class="empty-state"><div class="ei">🎈</div><p>Nenhum convidado ainda</p></div>';return;}
-  el.innerHTML=D.conv.map(c=>`<div class="list-item ${scls(c.status)}">
-    <div class="lib">
-      <div class="lit">${c.tipo==='Criança'?'👧':'👨'} ${c.nome}</div>
-      <div class="lis">${c.tipo}${c.tel?' · '+c.tel:''}</div>
-    </div>
-    <div class="lir">
-      ${badge(c.status)}
-      <div style="display:flex;gap:5px">
-        <button class="btn btn-cherry btn-sm" onclick="openStatusModal('conv',${c.id},'${c.status}')" style="padding:5px 10px;font-size:11px">✏️</button>
-        <button class="btn btn-red btn-sm" onclick="delConv(${c.id})" style="padding:5px 10px;font-size:11px">🗑️</button>
+  const totFam      = D.conv.length;
+  const totAdultos  = D.conv.reduce((s,x)=>s+(parseInt(x.adultos)||0),0);
+  const totCriancas = D.conv.reduce((s,x)=>s+(parseInt(x.criancas)||0),0);
+  const totPessoas  = totAdultos + totCriancas;
+  const cnfFam      = D.conv.filter(x=>x.status==='Confirmado').length;
+  const cnfAdultos  = D.conv.filter(x=>x.status==='Confirmado').reduce((s,x)=>s+(parseInt(x.adultos)||0),0);
+  const cnfCriancas = D.conv.filter(x=>x.status==='Confirmado').reduce((s,x)=>s+(parseInt(x.criancas)||0),0);
+  const naoVirao    = D.conv.filter(x=>x.status==="Não virá");
+  const aguardando  = D.conv.filter(x=>x.status==='Aguardando');
+
+  // mini stats
+  document.getElementById('cTotFam').textContent      = totFam;
+  document.getElementById('cTotPessoas').textContent   = totPessoas;
+  document.getElementById('cTotCri').textContent       = totCriancas;
+  document.getElementById('cTotAdultos').textContent   = totAdultos;
+
+  // barra confirmação (por família)
+  const pct = totFam ? Math.round(cnfFam/totFam*100) : 0;
+  document.getElementById('progConf').style.width = pct+'%';
+  document.getElementById('progPct').textContent  = pct+'%';
+
+  // update global sumConv
+  document.getElementById('sumConv').textContent = totPessoas;
+
+  // lista
+  const el = document.getElementById('cLista');
+  if(!D.conv.length){
+    el.innerHTML='<div class="empty-state"><div class="ei">🎈</div><p>Nenhuma família ainda</p></div>';
+  } else {
+    el.innerHTML = D.conv.map(c=>{
+      const total = (parseInt(c.adultos)||0) + (parseInt(c.criancas)||0);
+      return `<div class="fam-card ${scls(c.status)}">
+        <div class="fam-top">
+          <div>
+            <div class="fam-nome">👨‍👩‍👧 ${c.familia}</div>
+            <div class="fam-pills">
+              ${(parseInt(c.adultos)||0)>0?`<span class="fam-pill adulto">👨 ${c.adultos} adult${c.adultos==1?'o':'os'}</span>`:''}
+              ${(parseInt(c.criancas)||0)>0?`<span class="fam-pill crianca">👧 ${c.criancas} criança${c.criancas==1?'':'s'}</span>`:''}
+              <span class="fam-pill" style="background:#f0f0f0;color:#555">👥 ${total} total</span>
+            </div>
+          </div>
+          <div class="fam-actions">
+            ${badge(c.status)}
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;margin-top:9px;justify-content:flex-end">
+          <button class="btn btn-cherry btn-sm" onclick="openStatusModal('conv',${c.id},'${c.status}')" style="padding:5px 10px;font-size:11px">✏️ Status</button>
+          <button class="btn btn-red btn-sm" onclick="delConv(${c.id})" style="padding:5px 10px;font-size:11px">🗑️</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // resumo detalhado
+  const resumoCard = document.getElementById('resumoConvCard');
+  if(totFam > 0){
+    resumoCard.style.display = 'block';
+    document.getElementById('resumoConvBody').innerHTML = `
+      <div class="resumo-section">
+        <div class="resumo-section-title">✅ Confirmados</div>
+        <div class="resumo-row"><span class="resumo-label">Famílias confirmadas</span><span class="resumo-val">${cnfFam}</span></div>
+        <div class="resumo-row"><span class="resumo-label">👨 Adultos confirmados</span><span class="resumo-val vg">${cnfAdultos}</span></div>
+        <div class="resumo-row"><span class="resumo-label">👧 Crianças confirmadas</span><span class="resumo-val vg">${cnfCriancas}</span></div>
+        <div class="resumo-row" style="border-top:2px solid #d6f5e3;margin-top:4px;padding-top:10px"><span class="resumo-label" style="font-weight:700">Total confirmado</span><span class="resumo-val" style="color:var(--leaf)">${cnfAdultos+cnfCriancas} pessoas</span></div>
       </div>
-    </div>
-  </div>`).join('');
+      <div class="resumo-section">
+        <div class="resumo-section-title">📊 Geral</div>
+        <div class="resumo-row"><span class="resumo-label">Total de famílias</span><span class="resumo-val">${totFam}</span></div>
+        <div class="resumo-row"><span class="resumo-label">Total de adultos</span><span class="resumo-val">${totAdultos}</span></div>
+        <div class="resumo-row"><span class="resumo-label">Total de crianças</span><span class="resumo-val">${totCriancas}</span></div>
+        <div class="resumo-row"><span class="resumo-label">⏳ Aguardando resposta</span><span class="resumo-val" style="color:#8a6000">${aguardando.length} famílias</span></div>
+        <div class="resumo-row"><span class="resumo-label">❌ Não virão</span><span class="resumo-val" style="color:#b00020">${naoVirao.length} famílias</span></div>
+        <div class="resumo-row" style="border-top:2px solid var(--cherry-pale);margin-top:4px;padding-top:10px"><span class="resumo-label" style="font-weight:700">Total de pessoas</span><span class="resumo-val">${totPessoas} pessoas</span></div>
+      </div>`;
+  } else {
+    resumoCard.style.display = 'none';
+  }
 }
 
 // ════════════════════════════════════
@@ -632,7 +757,7 @@ function renderPlan(){
 
   const todos=[
     ...D.orc.map(x=>({i:'💰',d:x.desc,c:x.cat,v:x.valor,s:x.status})),
-    ...D.conv.map(x=>({i:'👥',d:x.nome,c:x.tipo,v:0,s:x.status}))
+    ...D.conv.map(x=>({i:'👨‍👩‍👧',d:x.familia,c:`${x.adultos||0} adultos · ${x.criancas||0} crianças`,v:0,s:x.status}))
   ];
   document.getElementById('planTudo').innerHTML=todos.length?todos.map(t=>`
     <div class="list-item ${scls(t.s)}">
@@ -648,7 +773,7 @@ function renderGlobal(){
   document.getElementById('sumTotal').textContent=fmtS(tot);
   document.getElementById('sumPago').textContent=fmtS(pago);
   document.getElementById('sumPend').textContent=fmtS(tot-pago);
-  document.getElementById('sumConv').textContent=D.conv.length;
+  // sumConv é atualizado dentro de renderConv
 }
 
 function render(){renderOrc();renderConv();renderPlan();renderGlobal();}
@@ -659,7 +784,7 @@ function render(){renderOrc();renderConv();renderPlan();renderGlobal();}
 async function pushSheet(tipo){
   const payload = tipo==='orcamentos'
     ? {type:'orcamentos', rows:D.orc}
-    : {type:'convidados', rows:D.conv};
+    : {type:'convidados', rows:D.conv.map(c=>({id:c.id,familia:c.familia,adultos:c.adultos,criancas:c.criancas,status:c.status}))};
   try{
     await fetch(SHEETS_URL,{
       method:'POST', mode:'no-cors',
@@ -703,8 +828,10 @@ async function pullSheet(){
     if(remote.convidados && Array.isArray(remote.convidados)){
       const remoteConv = remote.convidados.map(r=>({
         id: parseInt(r.id)||Date.now(),
-        nome: r.nome||'', tipo: r.tipo||'Adulto',
-        status: r.status||'Aguardando', tel: r.tel||''
+        familia:  r.familia||r.nome||'',
+        adultos:  parseInt(r.adultos)||0,
+        criancas: parseInt(r.criancas)||0,
+        status:   r.status||'Aguardando'
       }));
       if(JSON.stringify(remoteConv)!==JSON.stringify(D.conv)){
         D.conv = remoteConv; updated=true;
@@ -782,7 +909,7 @@ function exportCSV(tipo){
     csv='Descrição,Categoria,Valor,Status,Observações,Data\n'+D.orc.map(x=>`"${x.desc}","${x.cat}","${x.valor}","${x.status}","${x.obs||''}","${x.data||''}"`).join('\n');
     nome='orcamentos_ana_clara.csv';
   } else {
-    csv='Nome,Tipo,Confirmação,Telefone\n'+D.conv.map(x=>`"${x.nome}","${x.tipo}","${x.status}","${x.tel||''}"`).join('\n');
+    csv='Família,Adultos,Crianças,Total,Confirmação\n'+D.conv.map(x=>`"${x.familia||''}","${x.adultos||0}","${x.criancas||0}","${(parseInt(x.adultos)||0)+(parseInt(x.criancas)||0)}","${x.status}"`).join('\n');
     nome='convidados_ana_clara.csv';
   }
   dlCSV(csv,nome);
@@ -790,8 +917,8 @@ function exportCSV(tipo){
 function exportCSVAll(){
   let c='ORÇAMENTOS\nDescrição,Categoria,Valor,Status,Observações,Data\n';
   c+=D.orc.map(x=>`"${x.desc}","${x.cat}","${x.valor}","${x.status}","${x.obs||''}","${x.data||''}"`).join('\n');
-  c+='\n\nCONVIDADOS\nNome,Tipo,Confirmação,Telefone\n';
-  c+=D.conv.map(x=>`"${x.nome}","${x.tipo}","${x.status}","${x.tel||''}"`).join('\n');
+  c+='\n\nCONVIDADOS\nFamília,Adultos,Crianças,Total,Confirmação\n';
+  c+=D.conv.map(x=>`"${x.familia||''}","${x.adultos||0}","${x.criancas||0}","${(parseInt(x.adultos)||0)+(parseInt(x.criancas)||0)}","${x.status}"`).join('\n');
   dlCSV(c,'festa_ana_clara_completo.csv');
 }
 function dlCSV(content,filename){
