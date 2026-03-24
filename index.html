@@ -3,95 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poster Maker Pro - Layout Desktop</title>
+    <title>Poster Maker Pro - Smart Cut</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Proporção A4 vertical (1 / 1.4142) */
         .a4-preview-item {
             aspect-ratio: 210 / 297;
-            background: white;
-            border: 1px solid #cbd5e1;
+            background: #fff;
+            border: 1px solid #e2e8f0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        /* Esconde setas padrão do input number para um look cleaner, mas mantém funcional */
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            margin: 0;
-        }
+        canvas { width: 100%; height: 100%; display: block; image-rendering: high-quality; }
+        .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen">
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
 
     <div class="max-w-[1600px] mx-auto p-4 md:p-8">
-        <header class="mb-8 border-b border-slate-200 pb-4">
-            <h1 class="text-3xl font-black text-slate-800 tracking-tight">POSTER<span class="text-blue-600">LAB</span></h1>
-            <p class="text-slate-500 text-sm">Divisor de imagens em escala real para impressão A4.</p>
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <div>
+                <h1 class="text-2xl font-black tracking-tight text-slate-800">POSTER<span class="text-blue-600">SMART</span></h1>
+                <p id="suggestionText" class="text-xs text-slate-500 font-medium mt-1">Aguardando imagem para sugerir formato...</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="bg-slate-100 p-1.5 rounded-xl flex gap-1">
+                    <button id="modeCover" onclick="setMode('cover')" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600">PREENCHER</button>
+                    <button id="modeContain" onclick="setMode('contain')" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-500">INTEIRA</button>
+                </div>
+            </div>
         </header>
 
         <div class="flex flex-col-reverse lg:flex-row gap-8">
-            
             <main class="flex-1">
-                <div class="bg-slate-200/50 rounded-3xl p-6 border-2 border-dashed border-slate-300 min-h-[70vh] flex items-center justify-center">
-                    <div id="emptyState" class="text-center text-slate-400">
-                        <div class="text-6xl mb-4">🖼️</div>
-                        <p class="font-medium">Sua pré-visualização aparecerá aqui após o upload</p>
+                <div class="bg-slate-200/40 rounded-[2rem] p-4 md:p-10 border-2 border-dashed border-slate-300 min-h-[70vh] flex items-center justify-center">
+                    <div id="preview" class="grid gap-2 w-full max-w-5xl transition-all duration-500">
+                        <div class="col-span-full text-center text-slate-400 py-20">
+                            <span class="text-5xl block mb-4">📸</span>
+                            <p class="font-semibold">Suba uma foto para começar</p>
+                        </div>
                     </div>
-                    <div id="preview" class="grid gap-3 w-full max-w-5xl"></div>
                 </div>
             </main>
 
-            <aside class="w-full lg:w-80 space-y-6">
-                <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-200 sticky top-8">
-                    <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-                        <span>⚙️</span> Configurações
-                    </h2>
+            <aside class="w-full lg:w-80 space-y-4">
+                <div class="bg-white p-6 rounded-[2rem] shadow-xl border border-slate-200 sticky top-8">
+                    <div class="mb-6">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Arquivo Original</label>
+                        <input type="file" id="upload" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"/>
+                    </div>
 
-                    <div class="mb-8">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">1. Imagem Base</label>
-                        <div class="relative">
-                            <input type="file" id="upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                            <div class="border-2 border-blue-100 bg-blue-50/50 rounded-xl p-4 text-center text-blue-700 text-sm font-semibold hover:bg-blue-100 transition">
-                                Selecionar Arquivo
-                            </div>
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                            <span class="text-sm font-bold text-slate-600 uppercase text-[10px]">Colunas</span>
+                            <input type="number" id="cols" value="2" min="1" max="12" class="w-12 text-center font-bold bg-transparent text-blue-600 outline-none text-lg">
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                            <span class="text-sm font-bold text-slate-600 uppercase text-[10px]">Linhas</span>
+                            <input type="number" id="rows" value="2" min="1" max="12" class="w-12 text-center font-bold bg-transparent text-blue-600 outline-none text-lg">
                         </div>
                     </div>
 
-                    <div class="mb-8">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-4">2. Ajustar Grade</label>
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <span class="text-sm font-medium text-slate-600">Colunas</span>
-                                <input type="number" id="cols" value="2" min="1" max="12" class="w-16 text-center font-bold bg-white border border-slate-200 rounded-lg p-1 text-blue-600 focus:ring-2 focus:ring-blue-400 outline-none">
-                            </div>
-                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                <span class="text-sm font-medium text-slate-600">Linhas</span>
-                                <input type="number" id="rows" value="2" min="1" max="12" class="w-16 text-center font-bold bg-white border border-slate-200 rounded-lg p-1 text-blue-600 focus:ring-2 focus:ring-blue-400 outline-none">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button id="downloadBtn" disabled class="w-full bg-slate-800 hover:bg-black disabled:bg-slate-200 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-200">
-                        <span>📥</span> Baixar Tudo
+                    <button id="downloadBtn" disabled class="w-full bg-slate-900 hover:bg-blue-600 disabled:bg-slate-100 text-white font-bold py-5 rounded-2xl transition-all flex flex-col items-center gap-1 shadow-lg shadow-slate-200 disabled:shadow-none">
+                        <span>Baixar Todas as Folhas</span>
+                        <span class="text-[9px] font-normal opacity-60 uppercase tracking-tighter">Resolução máxima para A4</span>
                     </button>
-                    
+
                     <div class="mt-6 pt-6 border-t border-slate-100">
-                        <div class="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                            Modo Alta Resolução Ativo
-                        </div>
+                        <p class="text-[10px] text-slate-400 leading-relaxed italic text-center">
+                            *Cada folha será baixada individualmente para manter a qualidade original.
+                        </p>
                     </div>
                 </div>
             </aside>
-
         </div>
     </div>
 
@@ -100,13 +83,20 @@
         const colsInput = document.getElementById('cols');
         const rowsInput = document.getElementById('rows');
         const preview = document.getElementById('preview');
-        const emptyState = document.getElementById('emptyState');
         const downloadBtn = document.getElementById('downloadBtn');
-
+        const suggestionText = document.getElementById('suggestionText');
+        
         let imgOriginal = null;
         let partesGeradas = [];
+        let currentMode = 'cover'; // 'cover' ou 'contain'
 
-        // Atualização em tempo real
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('modeCover').className = mode === 'cover' ? 'px-4 py-1.5 text-xs font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600' : 'px-4 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-500';
+            document.getElementById('modeContain').className = mode === 'contain' ? 'px-4 py-1.5 text-xs font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600' : 'px-4 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-500';
+            if(imgOriginal) processarImagem();
+        }
+
         [colsInput, rowsInput].forEach(input => {
             input.oninput = () => { if(imgOriginal) processarImagem(); };
         });
@@ -115,46 +105,103 @@
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = (ev) => {
                 imgOriginal = new Image();
                 imgOriginal.onload = () => {
-                    emptyState.style.display = 'none';
+                    sugerirFormato();
                     processarImagem();
                 };
-                imgOriginal.src = event.target.result;
+                imgOriginal.src = ev.target.result;
             };
             reader.readAsDataURL(file);
         };
 
-        function processarImagem() {
-            const cols = Math.max(1, parseInt(colsInput.value) || 1);
-            const rows = Math.max(1, parseInt(rowsInput.value) || 1);
+        function sugerirFormato() {
+            const imgAspect = imgOriginal.width / imgOriginal.height;
+            const a4Aspect = 210 / 297;
             
+            // Sugestão simples baseada na orientação
+            if (imgAspect > 1.2) { // Imagem bem larga
+                colsInput.value = 3;
+                rowsInput.value = 2;
+                suggestionText.innerText = "💡 Sugestão: 3x2 (Imagem larga detectada)";
+            } else if (imgAspect < 0.8) { // Imagem bem alta
+                colsInput.value = 2;
+                rowsInput.value = 3;
+                suggestionText.innerText = "💡 Sugestão: 2x3 (Imagem alta detectada)";
+            } else {
+                colsInput.value = 2;
+                rowsInput.value = 2;
+                suggestionText.innerText = "💡 Sugestão: 2x2 (Imagem equilibrada)";
+            }
+        }
+
+        function processarImagem() {
+            const cols = parseInt(colsInput.value) || 1;
+            const rows = parseInt(rowsInput.value) || 1;
             preview.innerHTML = '';
             partesGeradas = [];
             preview.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
-            const pW = imgOriginal.width / cols;
-            const pH = imgOriginal.height / rows;
+            const posterAspect = (cols * 210) / (rows * 297);
+            const imageAspect = imgOriginal.width / imgOriginal.height;
+
+            let sW, sH, sX = 0, sY = 0;
+
+            if (currentMode === 'cover') {
+                if (imageAspect > posterAspect) {
+                    sH = imgOriginal.height;
+                    sW = imgOriginal.height * posterAspect;
+                    sX = (imgOriginal.width - sW) / 2;
+                } else {
+                    sW = imgOriginal.width;
+                    sH = imgOriginal.width / posterAspect;
+                    sY = (imgOriginal.height - sH) / 2;
+                }
+            } else {
+                // Modo Contain (Mostra tudo, pode sobrar branco)
+                if (imageAspect > posterAspect) {
+                    sW = imgOriginal.width;
+                    sH = imgOriginal.width / posterAspect;
+                    sY = (imgOriginal.height - sH) / 2;
+                } else {
+                    sH = imgOriginal.height;
+                    sW = imgOriginal.height * posterAspect;
+                    sX = (imgOriginal.width - sW) / 2;
+                }
+            }
+
+            const pieceW = sW / cols;
+            const pieceH = sH / rows;
 
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'a4-preview-item';
+                    const wrap = document.createElement('div');
+                    wrap.className = 'a4-preview-item';
                     
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    canvas.width = pW;
-                    canvas.height = pH;
-
-                    ctx.drawImage(imgOriginal, c * pW, r * pH, pW, pH, 0, 0, pW, pH);
                     
-                    wrapper.appendChild(canvas);
-                    preview.appendChild(wrapper);
+                    // Alta definição para impressão A4
+                    canvas.width = 1500; 
+                    canvas.height = 2121;
+
+                    // Fundo branco caso o modo 'contain' deixe bordas
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    ctx.drawImage(
+                        imgOriginal, 
+                        sX + (c * pieceW), sY + (r * pieceH), pieceW, pieceH, 
+                        0, 0, canvas.width, canvas.height
+                    );
+                    
+                    wrap.appendChild(canvas);
+                    preview.appendChild(wrap);
                     
                     partesGeradas.push({
                         data: canvas.toDataURL('image/png', 1.0),
-                        name: `parte_${r+1}_${c+1}.png`
+                        name: `poster_A4_R${r+1}_C${c+1}.png`
                     });
                 }
             }
@@ -165,10 +212,8 @@
             partesGeradas.forEach((img, i) => {
                 setTimeout(() => {
                     const a = document.createElement('a');
-                    a.href = img.data;
-                    a.download = img.name;
-                    a.click();
-                }, i * 350); // Delay para garantir o download de múltiplos arquivos
+                    a.href = img.data; a.download = img.name; a.click();
+                }, i * 350);
             });
         };
     </script>
