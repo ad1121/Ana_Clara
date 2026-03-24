@@ -3,72 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poster Maker Pro - Divisor A4</title>
+    <title>Poster Maker Pro - Layout Desktop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .preview-grid canvas {
-            width: 100%;
-            height: auto;
-            border: 1px dashed #cbd5e1;
-            transition: transform 0.2s;
+        /* Proporção A4 vertical (1 / 1.4142) */
+        .a4-preview-item {
+            aspect-ratio: 210 / 297;
+            background: white;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .preview-grid canvas:hover {
-            transform: scale(1.02);
-            border-style: solid;
-            border-color: #3b82f6;
-            z-index: 10;
+        canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* Esconde setas padrão do input number para um look cleaner, mas mantém funcional */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            margin: 0;
         }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 md:p-8">
+<body class="bg-slate-100 min-h-screen">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-slate-800 mb-2">Poster Maker Pro</h1>
-            <p class="text-slate-600">Transforme uma imagem em um poster gigante dividido em folhas A4.</p>
+    <div class="max-w-[1600px] mx-auto p-4 md:p-8">
+        <header class="mb-8 border-b border-slate-200 pb-4">
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight">POSTER<span class="text-blue-600">LAB</span></h1>
+            <p class="text-slate-500 text-sm">Divisor de imagens em escala real para impressão A4.</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <aside class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit sticky top-8">
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">1. Escolha a Imagem</label>
-                    <input type="file" id="upload" accept="image/*" 
-                        class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"/>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Colunas</label>
-                        <input type="number" id="cols" value="2" min="1" max="10" 
-                            class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        <div class="flex flex-col-reverse lg:flex-row gap-8">
+            
+            <main class="flex-1">
+                <div class="bg-slate-200/50 rounded-3xl p-6 border-2 border-dashed border-slate-300 min-h-[70vh] flex items-center justify-center">
+                    <div id="emptyState" class="text-center text-slate-400">
+                        <div class="text-6xl mb-4">🖼️</div>
+                        <p class="font-medium">Sua pré-visualização aparecerá aqui após o upload</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Linhas</label>
-                        <input type="number" id="rows" value="2" min="1" max="10" 
-                            class="w-full border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
+                    <div id="preview" class="grid gap-3 w-full max-w-5xl"></div>
                 </div>
+            </main>
 
-                <div class="space-y-3">
-                    <button id="downloadBtn" disabled
-                        class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-2">
-                        <span>Baixar Todas as Partes</span>
+            <aside class="w-full lg:w-80 space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-200 sticky top-8">
+                    <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <span>⚙️</span> Configurações
+                    </h2>
+
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">1. Imagem Base</label>
+                        <div class="relative">
+                            <input type="file" id="upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div class="border-2 border-blue-100 bg-blue-50/50 rounded-xl p-4 text-center text-blue-700 text-sm font-semibold hover:bg-blue-100 transition">
+                                Selecionar Arquivo
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-4">2. Ajustar Grade</label>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-sm font-medium text-slate-600">Colunas</span>
+                                <input type="number" id="cols" value="2" min="1" max="12" class="w-16 text-center font-bold bg-white border border-slate-200 rounded-lg p-1 text-blue-600 focus:ring-2 focus:ring-blue-400 outline-none">
+                            </div>
+                            <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-sm font-medium text-slate-600">Linhas</span>
+                                <input type="number" id="rows" value="2" min="1" max="12" class="w-16 text-center font-bold bg-white border border-slate-200 rounded-lg p-1 text-blue-600 focus:ring-2 focus:ring-blue-400 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="downloadBtn" disabled class="w-full bg-slate-800 hover:bg-black disabled:bg-slate-200 text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-200">
+                        <span>📥</span> Baixar Tudo
                     </button>
-                    <p class="text-[10px] text-slate-400 text-center uppercase tracking-wider font-bold">Resolução Original Preservada</p>
+                    
+                    <div class="mt-6 pt-6 border-t border-slate-100">
+                        <div class="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            Modo Alta Resolução Ativo
+                        </div>
+                    </div>
                 </div>
             </aside>
 
-            <main class="lg:col-span-3">
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 min-h-[400px]">
-                    <div id="emptyState" class="flex flex-col items-center justify-center h-[400px] text-slate-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.587-1.587a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p>A pré-visualização aparecerá aqui</p>
-                    </div>
-                    <div id="preview" class="preview-grid grid gap-1"></div>
-                </div>
-            </main>
         </div>
     </div>
 
@@ -83,54 +106,55 @@
         let imgOriginal = null;
         let partesGeradas = [];
 
-        // Atualiza em tempo real ao mudar números ou arquivo
+        // Atualização em tempo real
         [colsInput, rowsInput].forEach(input => {
-            input.addEventListener('input', () => {
-                if (imgOriginal) processarImagem();
-            });
+            input.oninput = () => { if(imgOriginal) processarImagem(); };
         });
 
-        upload.addEventListener('change', (e) => {
+        upload.onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = (event) => {
                 imgOriginal = new Image();
                 imgOriginal.onload = () => {
-                    emptyState.classList.add('hidden');
+                    emptyState.style.display = 'none';
                     processarImagem();
                 };
                 imgOriginal.src = event.target.result;
             };
             reader.readAsDataURL(file);
-        });
+        };
 
         function processarImagem() {
-            const cols = parseInt(colsInput.value) || 1;
-            const rows = parseInt(rowsInput.value) || 1;
+            const cols = Math.max(1, parseInt(colsInput.value) || 1);
+            const rows = Math.max(1, parseInt(rowsInput.value) || 1);
             
             preview.innerHTML = '';
             partesGeradas = [];
             preview.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
-            const pieceWidth = imgOriginal.width / cols;
-            const pieceHeight = imgOriginal.height / rows;
+            const pW = imgOriginal.width / cols;
+            const pH = imgOriginal.height / rows;
 
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'a4-preview-item';
+                    
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    
-                    canvas.width = pieceWidth;
-                    canvas.height = pieceHeight;
+                    canvas.width = pW;
+                    canvas.height = pH;
 
-                    ctx.drawImage(imgOriginal, c * pieceWidth, r * pieceHeight, pieceWidth, pieceHeight, 0, 0, pieceWidth, pieceHeight);
+                    ctx.drawImage(imgOriginal, c * pW, r * pH, pW, pH, 0, 0, pW, pH);
                     
-                    preview.appendChild(canvas);
+                    wrapper.appendChild(canvas);
+                    preview.appendChild(wrapper);
+                    
                     partesGeradas.push({
                         data: canvas.toDataURL('image/png', 1.0),
-                        name: `poster_parte_R${r+1}_C${c+1}.png`
+                        name: `parte_${r+1}_${c+1}.png`
                     });
                 }
             }
@@ -138,13 +162,13 @@
         }
 
         downloadBtn.onclick = () => {
-            partesGeradas.forEach((imgObj, index) => {
+            partesGeradas.forEach((img, i) => {
                 setTimeout(() => {
-                    const link = document.createElement('a');
-                    link.href = imgObj.data;
-                    link.download = imgObj.name;
-                    link.click();
-                }, index * 250);
+                    const a = document.createElement('a');
+                    a.href = img.data;
+                    a.download = img.name;
+                    a.click();
+                }, i * 350); // Delay para garantir o download de múltiplos arquivos
             });
         };
     </script>
