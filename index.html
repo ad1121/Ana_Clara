@@ -167,19 +167,21 @@
         .menu-btn.active:hover { background: var(--blue-dark); }
 
         /* Desktop: sidebar always visible */
-        @media (min-width: 768px) {
-            .hamburger { display: none !important; }
-            .sidebar-overlay { display: none !important; }
-            .sidebar {
-                transform: translateX(0) !important;
-                position: sticky;
-                top: 0;
-                height: 100vh;
-                flex-shrink: 0;
-                box-shadow: 2px 0 16px rgba(0,0,0,0.08);
-            }
-            .sidebar:hover .sidebar-nav .menu-btn .label { opacity: 1; }
-        }
+     @media (min-width: 768px) {
+    .hamburger { display: flex !important; }
+    .sidebar-overlay { display: block !important; }
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        top: 0;
+        height: 100vh;
+        flex-shrink: 0;
+        box-shadow: 2px 0 16px rgba(0,0,0,0.08);
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+}
 
         /* ===== MAIN LAYOUT ===== */
         .app-layout {
