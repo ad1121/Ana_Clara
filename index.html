@@ -283,7 +283,10 @@
                             <div class="screen-title" style="margin-bottom:4px;">Lista de Inscritos</div>
                             <div class="coord-count" id="coord-count">Carregando...</div>
                         </div>
-                        <button onclick="atualizarLista()" class="btn-sm">🔄 Sincronizar</button>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button onclick="atualizarLista()" class="btn-sm">🔄 Sincronizar</button>
+                            <button onclick="gerarRelatorio()" class="btn-sm" id="btnRelatorio" style="background:var(--green);">📄 Relatório PDF</button>
+                        </div>
                     </div>
                     <div class="table-wrap">
                         <table>
@@ -614,6 +617,7 @@ async function atualizarLista() {
             count.textContent = '0 inscritos'; return;
         }
         count.textContent = d.length + ' inscrito(s)';
+        _listaCache = d;
         body.innerHTML = d.map((i, idx) => `
             <tr>
                 <td class="td-num">${idx+1}</td>
@@ -625,6 +629,236 @@ async function atualizarLista() {
         body.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:32px;color:#dc2626;font-weight:600;">⚠️ Erro ao carregar. Clique em Sincronizar.</td></tr>`;
         count.textContent = 'Erro';
     }
+}
+
+// ===== RELATÓRIO PDF =====
+let _listaCache = [];
+
+async function gerarRelatorio() {
+    const btn = document.getElementById('btnRelatorio');
+    btn.textContent = "⏳ Gerando...";
+    btn.disabled = true;
+    try {
+        let dados = _listaCache;
+        if (!dados || dados.length === 0) {
+            const r = await fetch(SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' });
+            if (!r.ok) throw new Error();
+            dados = await r.json();
+        }
+        if (!Array.isArray(dados) || dados.length === 0) {
+            toast('⚠️ Nenhum inscrito encontrado.', 'error');
+            return;
+        }
+        _gerarRelatorioPDF(dados);
+        toast('📄 Relatório gerado com sucesso!', 'success');
+    } catch {
+        toast('⚠️ Erro ao gerar relatório. Sincronize primeiro.', 'error');
+    } finally {
+        btn.textContent = "📄 Relatório PDF";
+        btn.disabled = false;
+    }
+}
+
+function _gerarRelatorioPDF(dados) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210, H = 297;
+    const mL = 14, mR = 14, cW = W - mL - mR;
+
+    const azul    = [0, 90, 161];
+    const azulEsc = [0, 64, 128];
+    const verde   = [22, 163, 74];
+    const cinza   = [71, 85, 105];
+    const cinzaCl = [241, 245, 249];
+    const azulCl  = [232, 242, 252];
+    const branco  = [255, 255, 255];
+    const preto   = [30, 41, 59];
+
+    // HEADER
+    doc.setFillColor(...azul);
+    doc.rect(0, 0, W, 42, 'F');
+    doc.setFillColor(...azulEsc);
+    doc.rect(0, 36, W, 3, 'F');
+    doc.setFillColor(0, 110, 200);
+    doc.rect(0, 39, W, 3, 'F');
+
+    doc.setTextColor(...branco);
+    doc.setFont('helvetica', 'bolditalic');
+    doc.setFontSize(26);
+    doc.text('ENEM BIBLICO', W / 2, 18, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('SETOR 25  -  DISTRITO FEDERAL', W / 2, 26, { align: 'center' });
+    doc.setFontSize(8);
+    const agora = new Date();
+    const dtStr = agora.toLocaleDateString('pt-BR') + '  |  ' + agora.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    doc.text('Relatorio gerado em ' + dtStr, W / 2, 33, { align: 'center' });
+
+    let y = 52;
+
+    // TÍTULO
+    doc.setTextColor(...azul);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.text('RELATORIO DE PARTICIPANTES', mL, y);
+    doc.setDrawColor(...azul);
+    doc.setLineWidth(0.6);
+    doc.line(mL, y + 2, W - mR, y + 2);
+    y += 12;
+
+    // STATS CARDS
+    const igrejas = {};
+    let somaIdades = 0, countIdades = 0;
+    dados.forEach(i => {
+        const ig = (i.igreja || 'Nao informado').trim();
+        igrejas[ig] = (igrejas[ig] || 0) + 1;
+        const id = parseInt(i.idade);
+        if (!isNaN(id)) { somaIdades += id; countIdades++; }
+    });
+    const totalIgrejas = Object.keys(igrejas).length;
+    const idadeMedia = countIdades > 0 ? (somaIdades / countIdades).toFixed(1) : null;
+
+    const cards = [
+        { label: 'Total de Inscritos',     value: String(dados.length) },
+        { label: 'Igrejas Representadas',  value: String(totalIgrejas) },
+        { label: 'Media de Idade',         value: idadeMedia ? idadeMedia + ' anos' : '-' },
+        { label: '1a Prova',               value: '31 de Maio' },
+    ];
+
+    const cW4 = (cW - 9) / 4;
+    cards.forEach((c, i) => {
+        const cx = mL + i * (cW4 + 3);
+        doc.setFillColor(...azulCl);
+        doc.roundedRect(cx, y, cW4, 22, 3, 3, 'F');
+        doc.setDrawColor(199, 223, 240);
+        doc.roundedRect(cx, y, cW4, 22, 3, 3, 'S');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(...cinza);
+        doc.text(c.label, cx + cW4/2, y + 8, { align: 'center' });
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(...azul);
+        doc.text(c.value, cx + cW4/2, y + 17, { align: 'center' });
+    });
+    y += 30;
+
+    // TABELA DE PARTICIPANTES
+    doc.setTextColor(...azul);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('LISTA COMPLETA DE PARTICIPANTES', mL, y);
+    y += 6;
+
+    const cols = [
+        { label: '#',        w: 10 },
+        { label: 'NOME',     w: 68 },
+        { label: 'IGREJA',   w: 52 },
+        { label: 'WHATSAPP', w: 36 },
+        { label: 'IDADE',    w: 16 },
+    ];
+
+    const drawTableHeader = (yy) => {
+        doc.setFillColor(...azul);
+        doc.rect(mL, yy, cW, 8, 'F');
+        doc.setTextColor(...branco);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        let cx2 = mL + 2;
+        cols.forEach(col => { doc.text(col.label, cx2, yy + 5.5); cx2 += col.w; });
+        return yy + 8;
+    };
+
+    y = drawTableHeader(y);
+
+    const rowH = 7.5;
+    const pageBottom = H - 15;
+
+    dados.forEach((ins, idx) => {
+        if (y + rowH > pageBottom) {
+            doc.addPage();
+            y = drawTableHeader(16);
+        }
+        if (idx % 2 === 0) {
+            doc.setFillColor(...cinzaCl);
+            doc.rect(mL, y, cW, rowH, 'F');
+        }
+        const vals = [
+            String(idx + 1),
+            (ins.nome || '-').substring(0, 34).toUpperCase(),
+            (ins.igreja || '-').substring(0, 26),
+            (ins.telefone || '-').substring(0, 15),
+            ins.idade ? String(ins.idade) : '-',
+        ];
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        let vx = mL + 2;
+        vals.forEach((val, vi) => {
+            doc.setTextColor(vi === 3 ? azul[0] : preto[0], vi === 3 ? azul[1] : preto[1], vi === 3 ? azul[2] : preto[2]);
+            doc.text(val, vx, y + 5);
+            vx += cols[vi].w;
+        });
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.2);
+        doc.line(mL, y + rowH, mL + cW, y + rowH);
+        y += rowH;
+    });
+
+    y += 10;
+
+    // RESUMO POR IGREJA
+    if (y + 20 > pageBottom) { doc.addPage(); y = 20; }
+
+    doc.setDrawColor(...azul);
+    doc.setLineWidth(0.6);
+    doc.line(mL, y, W - mR, y);
+    y += 8;
+
+    doc.setTextColor(...azul);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('INSCRITOS POR IGREJA', mL, y);
+    y += 7;
+
+    const igrejasOrdenadas = Object.entries(igrejas).sort((a, b) => b[1] - a[1]);
+    const igCols = 2, igW = (cW - 4) / 2;
+
+    igrejasOrdenadas.forEach(([nome, qtd], idx) => {
+        if (idx % igCols === 0 && y + 8 > pageBottom) { doc.addPage(); y = 20; }
+        const col = idx % igCols;
+        const ix = mL + col * (igW + 4);
+        const iy = y;
+
+        doc.setFillColor(col === 0 ? azulCl[0] : cinzaCl[0], col === 0 ? azulCl[1] : cinzaCl[1], col === 0 ? azulCl[2] : cinzaCl[2]);
+        doc.roundedRect(ix, iy, igW, 7.5, 1.5, 1.5, 'F');
+
+        const pct = ((qtd / dados.length) * 100).toFixed(0);
+        doc.setTextColor(...preto);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.text(nome.substring(0, 30), ix + 3, iy + 5.2);
+        doc.setTextColor(...azul);
+        doc.text(qtd + ' (' + pct + '%)', ix + igW - 3, iy + 5.2, { align: 'right' });
+
+        if (col === igCols - 1) y += 9;
+    });
+    if (igrejasOrdenadas.length % igCols !== 0) y += 9;
+
+    // FOOTER em todas as paginas
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        doc.setFillColor(...azul);
+        doc.rect(0, H - 12, W, 12, 'F');
+        doc.setTextColor(...branco);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.text('Coordenacao: William e Nathalia  -  Setor 25 DF', mL, H - 5);
+        doc.text('Pagina ' + p + ' de ' + totalPages, W - mR, H - 5, { align: 'right' });
+    }
+
+    const filename = 'Relatorio_ENEM_Biblico_' + agora.toLocaleDateString('pt-BR').replace(/\//g,'-') + '.pdf';
+    doc.save(filename);
 }
 
 // ===== Clarinha CHATBOT =====
