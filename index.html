@@ -192,41 +192,41 @@
             }
         }
 
-        // --- BUSCA RESTRITA POR TELEFONE ---
-        async function buscarPorTelefone() {
-            const telBusca = document.getElementById('search-tel').value;
-            if (!telBusca) return alert("Digite o telefone cadastrado!");
+        // Substitua a função buscarPorTelefone no seu HTML por esta:
+async function buscarPorTelefone() {
+    const telDigitado = document.getElementById('search-tel').value.replace(/\D/g,''); // Remove tudo que não é número
+    
+    if (!telDigitado) {
+        alert("Por favor, digite seu telefone.");
+        return;
+    }
 
-            const btn = document.getElementById('btnSearch');
-            btn.innerText = "Buscando...";
-            btn.disabled = true;
+    const btn = document.getElementById('btnSearch');
+    btn.innerText = "Buscando...";
+    btn.disabled = true;
 
-            try {
-                const r = await fetch(SCRIPT_URL);
-                const data = await r.json();
-                // O script doGet da planilha deve retornar o campo telefone para que a busca funcione
-                const encontrado = data.find(i => i.telefone === telBusca || i.telefone.replace(/\D/g,'') === telBusca.replace(/\D/g,''));
+    try {
+        const r = await fetch(SCRIPT_URL);
+        const data = await r.json();
+        
+        // Procura na lista comparando apenas os números limpos
+        const encontrado = data.find(i => {
+            const telLimpoBanco = String(i.telefone).replace(/\D/g,'');
+            return telLimpoBanco === telDigitado;
+        });
 
-                if (encontrado) {
-                    gerarImpressao(encontrado.nome, `${encontrado.igreja} / ${encontrado.setor}`);
-                } else {
-                    alert("Inscrição não encontrada para este número.");
-                }
-            } catch (e) {
-                alert("Erro ao acessar banco de dados.");
-            } finally {
-                btn.innerText = "Verificar Status";
-                btn.disabled = false;
-            }
+        if (encontrado) {
+            gerarImpressao(encontrado.nome, `${encontrado.igreja} / ${encontrado.setor}`);
+        } else {
+            alert("Inscrição não encontrada. Verifique o número ou se o cadastro foi feito.");
         }
-
-        function gerarImpressao(nome, igrejaSetor) {
-            document.getElementById('c-nome').innerText = nome;
-            document.getElementById('c-igreja').innerText = igrejaSetor;
-            document.getElementById('interface').classList.add('hidden');
-            document.getElementById('comprovante').classList.remove('print-only');
-            window.print();
-        }
+    } catch (e) {
+        alert("Erro ao acessar a planilha. Verifique se a URL do Script está correta.");
+    } finally {
+        btn.innerText = "Verificar Status";
+        btn.disabled = false;
+    }
+}
 
         // --- LISTA DO COORDENADOR ---
         async function atualizarLista() {
