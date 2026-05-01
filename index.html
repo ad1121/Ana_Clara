@@ -6,80 +6,161 @@
     <title>ENEM BÍBLICO - UMADEB SETOR 25</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @page { size: A4; margin: 15mm; }
         .bg-enem-blue { background-color: #005aa1; }
         .bg-enem-light { background-color: #f4f7f9; }
-        .border-enem { border-color: #005aa1; }
+        .text-enem-blue { color: #005aa1; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background-color: white !important; }
+        }
+        .print-only { display: none; }
+        .comprovante-box { border: 2px dashed #005aa1; padding: 20px; background: white; }
     </style>
 </head>
 <body class="bg-enem-light font-sans min-h-screen">
 
-    <!-- Barra Superior -->
-    <header class="bg-enem-blue p-4 shadow-md">
-        <div class="container mx-auto flex justify-center">
-            <h1 class="text-white text-2xl font-bold italic tracking-wider">INEP <span class="font-light text-xl">enem bíblico</span></h1>
-        </div>
-    </header>
-
-    <main class="container mx-auto mt-10 p-4 flex flex-col md:flex-row gap-6">
-        
-        <!-- Menu Lateral Estilo ENEM -->
-        <aside class="w-full md:w-1/4 bg-enem-blue text-white rounded-lg p-6 space-y-4">
-            <h2 class="font-bold border-b border-blue-400 pb-2">SITE DO ENEM BÍBLICO</h2>
-            <ul class="space-y-3 text-sm">
-                <li>📄 Editais</li>
-                <li>📅 Cronograma</li>
-                <li>🌐 Orientações</li>
-                <li>❓ Dúvidas Frequentes</li>
-                <li class="pt-4 font-bold text-blue-200">Inscrições</li>
-                <li class="pl-2">Inscrições - Setor 25</li>
-            </ul>
-        </aside>
-
-        <!-- Área Central -->
-        <section class="w-full md:w-3/4 bg-white rounded-lg shadow-lg p-8 relative overflow-hidden border border-gray-200">
-            
-            <!-- Balão da Assistente -->
-            <div class="flex items-start gap-4 mb-10">
-                <div class="w-20 h-20 rounded-full border-2 border-enem bg-gray-100 flex-shrink-0">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Nanda&gender=female" alt="Assistente" class="rounded-full">
-                </div>
-                <div class="relative bg-gray-50 border border-gray-300 p-6 rounded-xl shadow-sm w-full">
-                    <div class="absolute left-0 top-6 -ml-2 w-4 h-4 bg-gray-50 border-l border-b border-gray-300 rotate-45"></div>
-                    <p class="text-gray-700 leading-relaxed">
-                        Olá! Sou a assistente do <strong>ENEM BÍBLICO</strong>!<br>
-                        Estou por dentro de tudo sobre a nossa prova do Setor 25.<br>
-                        Seja bem-vindo à Página do Participante. Escolha uma das opções abaixo:
-                    </p>
-                </div>
+    <!-- INTERFACE DO SITE -->
+    <div id="app-interface" class="no-print">
+        <header class="bg-enem-blue p-4 shadow-md">
+            <div class="container mx-auto flex justify-center">
+                <h1 class="text-white text-2xl tracking-wider uppercase">
+                    <span class="font-black">ENEM BÍBLICO</span>
+                </h1>
             </div>
+        </header>
 
-            <!-- Botões Principais -->
-            <div class="flex flex-col items-center gap-4">
-                <button onclick="abrirModal('inscricao')" class="bg-enem-blue hover:bg-blue-800 text-white font-bold py-3 px-10 rounded-full transition-all shadow-md w-full max-w-md">
-                    Fazer Inscrição
-                </button>
+        <main class="container mx-auto mt-6 p-4 flex flex-col md:flex-row gap-6">
+            <!-- Menu Lateral -->
+            <aside class="w-full md:w-1/4 bg-enem-blue text-white rounded-lg p-6 space-y-4 h-fit">
+                <h2 class="font-bold border-b border-blue-400 pb-2 uppercase text-xs">Site do Enem Bíblico</h2>
+                <ul class="space-y-3 text-sm">
+                    <li>📄 Editais</li>
+                    <li>📅 Cronograma</li>
+                    <li>🌐 Orientações</li>
+                    <li>❓ Dúvidas Frequentes</li>
+                    <li class="pt-4 font-bold text-blue-200">Acesso Restrito</li>
+                    <li class="pl-2 cursor-pointer hover:underline" onclick="showScreen('coordenador')">Painel do Coordenador</li>
+                </ul>
+            </aside>
+
+            <!-- Área de Conteúdo Dinâmico -->
+            <section class="w-full md:w-3/4 bg-white rounded-lg shadow-lg p-8 border border-gray-200 min-h-[400px]">
                 
-                <button onclick="abrirModal('conferir')" class="text-enem-blue hover:underline font-semibold mt-2">
-                    Conferir Inscrição
-                </button>
+                <!-- TELA 1: HOME -->
+                <div id="screen-home" class="screen">
+                    <div class="flex items-start gap-4 mb-8">
+                        <div class="w-16 h-16 rounded-full border-2 border-enem-blue bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Nanda" alt="Nanda">
+                        </div>
+                        <div class="relative bg-gray-50 border border-gray-300 p-4 rounded-xl shadow-sm w-full">
+                             <p class="text-gray-700 text-sm">Olá! Sou a assistente do <strong>ENEM BÍBLICO</strong>. O que deseja fazer hoje?</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center gap-4 py-6">
+                        <button onclick="showScreen('inscricao')" class="bg-enem-blue hover:bg-blue-800 text-white font-bold py-4 px-12 rounded-full transition-all shadow-lg w-full max-w-sm uppercase">Inscrição</button>
+                        <button onclick="showScreen('conferir')" class="text-enem-blue font-bold border border-enem-blue py-3 px-12 rounded-full hover:bg-blue-50 transition-all w-full max-w-sm">Conferir Inscrição</button>
+                    </div>
+                </div>
 
-                <hr class="w-full my-6 border-gray-200">
+                <!-- TELA 2: FORMULÁRIO DE INSCRIÇÃO -->
+                <div id="screen-inscricao" class="screen hidden">
+                    <h2 class="text-xl font-bold text-enem-blue mb-6 border-b pb-2 uppercase">Ficha de Inscrição</h2>
+                    <form onsubmit="event.preventDefault(); finalizarInscricao();" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input id="reg-nome" type="text" placeholder="Nome Completo" required class="border p-2 rounded">
+                            <input id="reg-idade" type="number" placeholder="Idade" required class="border p-2 rounded">
+                            <input id="reg-igreja" type="text" placeholder="Congrega em qual igreja?" required class="border p-2 rounded">
+                            <input id="reg-setor" type="text" placeholder="Setor" required class="border p-2 rounded">
+                            <input id="reg-tel" type="tel" placeholder="Telefone (00) 9 9999-9999" required class="border p-2 rounded">
+                            <input id="reg-exp" type="text" placeholder="Qual a expectativa?" class="border p-2 rounded">
+                        </div>
+                        <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-xs space-y-1">
+                            <p><strong>TERMOS:</strong> Portões 13:20 | Fechamento 13:50 | Caneta preta/azul | Entrega do celular | Prova sem consulta | Duração 2h.</p>
+                            <label class="flex items-center gap-2 mt-2 font-bold cursor-pointer">
+                                <input type="checkbox" required> Aceito os termos para conclusão da inscrição.
+                            </label>
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg">CONCLUIR INSCRIÇÃO</button>
+                    </aside>
+                </div>
 
-                <button onclick="abrirModal('coordenador')" class="bg-gray-700 hover:bg-black text-white text-xs py-2 px-6 rounded transition-all">
-                    Acesso Coordenador (William)
-                </button>
+                <!-- TELA 3: CONFERIR INSCRIÇÃO -->
+                <div id="screen-conferir" class="screen hidden">
+                    <h2 class="text-xl font-bold text-enem-blue mb-6 uppercase">Conferir Inscrição</h2>
+                    <div class="max-w-xs mx-auto space-y-4">
+                        <p class="text-sm text-gray-600">Digite seu telefone para confirmar a inscrição:</p>
+                        <input id="check-tel" type="tel" placeholder="(00) 9 9999-9999" class="w-full border p-2 rounded">
+                        <button onclick="buscarInscricao()" class="w-full bg-enem-blue text-white py-2 rounded">BUSCAR</button>
+                    </div>
+                </div>
+
+                <!-- TELA 4: PAINEL DO COORDENADOR -->
+                <div id="screen-coordenador" class="screen hidden">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-2">PAINEL DE CONTROLE - WILLIAM</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border">
+                            <thead class="bg-gray-100 uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-2 border">Nome</th>
+                                    <th class="p-2 border">Igreja</th>
+                                    <th class="p-2 border">Setor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-inscritos">
+                                <!-- Dados viriam do JSON/Banco -->
+                                <tr><td colspan="3" class="p-4 text-center text-gray-400 italic">Nenhum cadastro realizado no momento.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <button onclick="showScreen('home')" class="mt-8 text-gray-400 text-xs hover:underline flex items-center gap-1"> ← Voltar ao início</button>
+            </section>
+        </main>
+    </div>
+
+    <!-- TELA 5: COMPROVANTE DE IMPRESSÃO -->
+    <div id="printable-area" class="print-only p-8">
+        <div class="comprovante-box mx-auto max-w-2xl">
+            <div class="text-center border-b-2 border-enem-blue pb-4 mb-4">
+                <h1 class="text-2xl font-black text-enem-blue uppercase">COMPROVANTE DE INSCRIÇÃO</h1>
+                <h2 class="text-lg font-bold">ENEM BÍBLICO UMADEB SETOR 25</h2>
             </div>
-        </section>
-    </main>
-
-    <!-- Rodapé Informativo -->
-    <footer class="text-center p-6 text-gray-500 text-sm">
-        <p>ENEM BÍBLICO UMADEB SETOR 25 | Local: Adeb sede São Sebastião</p>
-    </footer>
+            <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+                <div><p class="text-[10px] text-gray-500 uppercase font-bold">Participante</p><p id="p-nome" class="font-bold">-</p></div>
+                <div><p class="text-[10px] text-gray-500 uppercase font-bold">Igreja / Setor</p><p id="p-igreja">-</p></div>
+            </div>
+            <div class="bg-gray-50 p-4 border rounded text-sm mb-4">
+                <p><strong>ETAPA 1:</strong> 31/05 | <strong>ETAPA 2:</strong> 12/07</p>
+                <p><strong>LOCAL:</strong> Adeb sede São Sebastião (Quadra 01 Conjunto 05 Lotes 5/6)</p>
+            </div>
+            <div class="text-[10px] grid grid-cols-2 pt-4 border-t uppercase font-bold text-gray-400 italic">
+                <span>Coord: William e Nathália</span>
+                <span class="text-right">Dc Marcos e Andressa</span>
+            </div>
+        </div>
+        <button onclick="window.print()" class="no-print mt-4 mx-auto block bg-blue-500 text-white px-4 py-2 rounded">IMPRIMIR AGORA</button>
+    </div>
 
     <script>
-        function abrirModal(tipo) {
-            alert("Etapa 1 concluída! Em breve abriremos o formulário de " + tipo + " para salvar no seu JSON do GitHub.");
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-' + id).classList.remove('hidden');
+        }
+
+        function finalizarInscricao() {
+            document.getElementById('p-nome').innerText = document.getElementById('reg-nome').value;
+            document.getElementById('p-igreja').innerText = document.getElementById('reg-igreja').value + " / " + document.getElementById('reg-setor').value;
+            
+            document.getElementById('app-interface').classList.add('hidden');
+            document.getElementById('printable-area').classList.remove('print-only');
+            window.print();
+        }
+
+        function buscarInscricao() {
+            alert("Buscando dados para o telefone: " + document.getElementById('check-tel').value);
         }
     </script>
 </body>
