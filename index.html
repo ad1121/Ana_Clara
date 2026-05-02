@@ -349,15 +349,7 @@ tr:hover td{background:var(--gray-50)}
 </div>
 </div>
 
-<div id="modalInscrito" class="modal-overlay">
-<div class="modal-box" style="text-align:left;max-width:400px;">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-<div class="modal-title" style="margin-bottom:0;">👤 Inscrito</div>
-<button onclick="document.getElementById('modalInscrito').classList.remove('open')" style="background:var(--gray-100);border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gray-600);">✕</button>
-</div>
-<div id="modalInscritoBody"></div>
-</div>
-</div>
+
 
 <div id="toast" class="toast"></div>
 
@@ -875,6 +867,32 @@ document.getElementById('notaValor').style.fontSize='52px';
 document.getElementById('notaBadge').style='';
 });
 setTimeout(()=>{const h=document.getElementById('ClarinhaHint');if(h)h.style.display='none';},4000);
+function verInscrito(idx){
+const i=_listaCache[idx];
+if(!i)return;
+const campos=[
+{icon:'👤',label:'Nome',val:(i.nome||'—').toUpperCase()},
+{icon:'⛪',label:'Igreja',val:i.igreja||'—'},
+{icon:'📱',label:'WhatsApp',val:i.telefone||'—'},
+{icon:'📧',label:'E-mail',val:i.email||'—'},
+{icon:'🎂',label:'Idade',val:i.idade?i.idade+' anos':'—'},
+{icon:'💬',label:'Expectativa',val:i.expectativa||'—'},
+{icon:'🏆',label:'Nota',val:(i.nota!==undefined&&i.nota!==null&&i.nota!=='')?i.nota+' pontos':'Ainda não lançada'},
+];
+document.getElementById('modalInscritoBody').innerHTML=campos.map(c=>`<div style="display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--gray-100);"><span style="font-size:20px;flex-shrink:0;">${c.icon}</span><div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--gray-400);font-weight:600;">${c.label}</div><div style="font-size:14px;font-weight:600;color:var(--gray-800);margin-top:2px;line-height:1.5;">${c.val}</div></div></div>`).join('');
+document.getElementById('modalInscrito').classList.add('open');
+}
 </script>
+
+<div id="modalInscrito" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal-box" style="text-align:left;max-width:400px;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+<div class="modal-title" style="margin-bottom:0;">👤 Dados do Inscrito</div>
+<button onclick="document.getElementById('modalInscrito').classList.remove('open')" style="background:var(--gray-100);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--gray-600);">✕</button>
+</div>
+<div id="modalInscritoBody"></div>
+</div>
+</div>
+
 </body>
 </html>
